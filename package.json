@@ -1,0 +1,11 @@
+{
+  "name": "facejo-official",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "node preview.mjs",
+    "check": "node --check build.mjs && node --check src/app.js"
+  }
+}

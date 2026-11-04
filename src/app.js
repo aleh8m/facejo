@@ -1,16 +1,175 @@
 const motionAllowed=!matchMedia('(prefers-reduced-motion: reduce)').matches;
-if(motionAllowed&&'IntersectionObserver'in window){document.documentElement.classList.add('js-motion');const observer=new IntersectionObserver(items=>items.forEach(item=>{if(item.isIntersecting){item.target.classList.add('revealed');observer.unobserve(item.target)}}),{threshold:.06});document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));}
-const menuButton=document.querySelector('.menu-toggle'),mobileNav=document.querySelector('#mobile-nav');
-menuButton?.addEventListener('click',()=>{const open=menuButton.getAttribute('aria-expanded')!=='true';menuButton.setAttribute('aria-expanded',String(open));menuButton.setAttribute('aria-label',open?'إغلاق القائمة':'فتح القائمة');mobileNav.hidden=!open;});
-document.addEventListener('keydown',event=>{if(event.key==='Escape'&&mobileNav&&!mobileNav.hidden){mobileNav.hidden=true;menuButton.setAttribute('aria-expanded','false');menuButton.focus();}});
-const backTop=document.querySelector('.back-top');window.addEventListener('scroll',()=>backTop?.classList.toggle('visible',scrollY>600),{passive:true});backTop?.addEventListener('click',()=>window.scrollTo({top:0,behavior:motionAllowed?'smooth':'instant'}));
-document.querySelectorAll('[data-filter]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('[data-filter]').forEach(b=>{b.classList.toggle('active',b===button);b.setAttribute('aria-pressed',String(b===button))});document.querySelectorAll('[data-category]').forEach(card=>{card.hidden=button.dataset.filter!=='all'&&card.dataset.category!==button.dataset.filter});}));
-const contactForm=document.querySelector('#contact-form');
-if(contactForm){const requested=new URLSearchParams(location.search).get('service');const select=contactForm.querySelector('select');if(requested){const known=[...select.options].find(o=>o.value===requested);if(known)select.value=requested;else if(requested.includes('50'))select.value='عرض الانطلاقة — 50 دينار';else if(requested.includes('برنامج'))select.value='برنامج مخصص';else if(requested.includes('متجر'))select.value='متجر إلكتروني';else if(requested.includes('شركة'))select.value='موقع شركة';}
-contactForm.addEventListener('submit',event=>{event.preventDefault();if(!contactForm.reportValidity())return;const data=new FormData(contactForm);const text=['مرحباً Facejo، عندي استفسار عن مشروع.','الاسم: '+data.get('name').trim(),data.get('business').trim()?'النشاط: '+data.get('business').trim():'','الخدمة: '+data.get('service'),'التفاصيل: '+data.get('details').trim()].filter(Boolean).join('\n');const url='https://wa.me/962791698516?text='+encodeURIComponent(text);const feedback=document.querySelector('#contact-feedback');feedback.textContent='تم تجهيز الرسالة. اضغط الرابط أدناه لفتح واتساب ومراجعتها قبل الإرسال.';const preview=document.querySelector('#contact-preview');preview.hidden=false;preview.replaceChildren();const copy=document.createElement('div');copy.className='message-preview';copy.textContent=text;const link=document.createElement('a');link.className='button';link.href=url;link.target='_blank';link.rel='noopener noreferrer';link.textContent='افتح الرسالة في واتساب ↗';link.style.marginTop='14px';preview.append(copy,link);});}
-function normalizeDomain(value){let name=value.trim().toLowerCase();if(/\s/.test(name))throw new Error('اكتب اسم نطاق دون فراغات، مثل myproject.com.');name=name.replace(/^https?:\/\//,'').replace(/^www\./,'').replace(/\/$/,'');if(/[\/?#@:\\]/.test(name))throw new Error('اكتب اسم النطاق فقط، دون مسار أو بريد أو رقم منفذ.');if(!name.includes('.'))name+='.com';let ascii;try{ascii=new URL('https://'+name).hostname}catch{throw new Error('اسم النطاق غير صالح. جرّب مثل myproject.com.')}const labels=ascii.split('.');if(ascii.length>253||labels.length!==2||labels.some(s=>!s.length||s.length>63||!/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(s))||!/^[a-z]{2,63}$/.test(labels.at(-1)))throw new Error('اكتب نطاقاً رئيسياً صالحاً، مثل myproject.com. للنطاقات الأردنية الفرعية استخدم البوابة الرسمية.');return ascii;}
-const domainForm=document.querySelector('#domain-form');let bootstrapPromise;
-async function fetchTimed(url,timeout=11000){const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),timeout);try{return await fetch(url,{signal:controller.signal,headers:{Accept:'application/rdap+json, application/json'}})}finally{clearTimeout(timer)}}
-async function getRegistry(domain){const tld=domain.split('.').at(-1);if(tld==='jo')return null;const builtin={com:'https://rdap.verisign.com/com/v1/',net:'https://rdap.verisign.com/net/v1/'};if(builtin[tld])return builtin[tld];if(!bootstrapPromise)bootstrapPromise=fetchTimed('https://data.iana.org/rdap/dns.json').then(r=>{if(!r.ok)throw new Error('bootstrap');return r.json()}).catch(e=>{bootstrapPromise=null;throw e});const bootstrap=await bootstrapPromise;return bootstrap.services?.find(([tlds])=>tlds.includes(tld))?.[1]?.find(base=>base.startsWith('https://'))||null;}
-function renderDomainResult({domain,status,message,checkedAt}){const area=document.querySelector('#domain-result');area.replaceChildren();const card=document.createElement('article');card.className='result-card '+status;const content=document.createElement('div');const title=document.createElement('h3');title.dir='ltr';title.textContent=domain;const info=document.createElement('p');info.textContent=message;const stamp=document.createElement('small');stamp.textContent=checkedAt?'وقت الفحص: '+new Intl.DateTimeFormat('ar-JO',{dateStyle:'short',timeStyle:'short',timeZone:'Asia/Amman'}).format(checkedAt):'';content.append(title,info,stamp);const link=document.createElement('a');link.target='_blank';link.rel='noopener noreferrer';link.className='button button-outline';if(domain.endsWith('.jo')){link.href='https://www.dns.jo/';link.textContent='افحص على البوابة الأردنية ↗'}else if(status==='maybe'){link.href='https://www.namecheap.com/domains/registration/results/?domain='+encodeURIComponent(domain);link.textContent='تأكد من إمكانية الحجز ↗'}else{link.href='https://lookup.icann.org/en/lookup?name='+encodeURIComponent(domain);link.textContent='تحقق عبر ICANN ↗'}card.append(content,link);area.append(card);}
-if(domainForm){const input=document.querySelector('#domain-input');document.querySelectorAll('[data-tld]').forEach(b=>b.addEventListener('click',()=>{let value=input.value.trim().replace(/^https?:\/\//,'').replace(/^www\./,'').split('/')[0];const base=value?value.split('.')[0]:'your-idea';input.value=base+'.'+b.dataset.tld;input.focus();}));domainForm.addEventListener('submit',async event=>{event.preventDefault();let domain;try{domain=normalizeDomain(input.value)}catch(error){document.querySelector('#domain-result').textContent=error.message;input.setAttribute('aria-invalid','true');input.focus();return}input.removeAttribute('aria-invalid');input.value=domain;const button=document.querySelector('#domain-submit');button.disabled=true;button.setAttribute('aria-busy','true');const area=document.querySelector('#domain-result');area.innerHTML='<div class="domain-loading"><span class="spinner" aria-hidden="true"></span>نستعلم عن حالة الاسم من سجل النطاقات…</div>';try{const registry=await getRegistry(domain);if(!registry){renderDomainResult({domain,status:'error',message:domain.endsWith('.jo')?'النطاقات الأردنية تُفحص عبر البوابة الوطنية الرسمية.':'الفحص المباشر غير متاح لهذا الامتداد. يمكنك التحقق عبر ICANN.'});return}const response=await fetchTimed(registry+'domain/'+encodeURIComponent(domain));let data=null;const raw=await response.text();if(raw.trim()){try{data=JSON.parse(raw)}catch{throw new Error('invalid')}}const checkedAt=new Date();if(response.ok&&data?.objectClassName==='domain'){renderDomainResult({domain,status:'taken',message:'النطاق مسجّل حالياً. جرّب اسماً آخر أو امتداداً مختلفاً.',checkedAt});}else if(response.status===404&&(data?.errorCode===404||(!raw.trim()&&(response.headers.get('content-type')||'').includes('application/rdap+json')))){renderDomainResult({domain,status:'maybe',message:'لا يوجد تسجيل في السجل عند الفحص. قد يكون قابلاً للحجز؛ أكّد التوفر والسعر عند المسجّل.',checkedAt});}else if(response.status===429){renderDomainResult({domain,status:'error',message:'وصلنا للحد المسموح من الاستعلامات. انتظر قليلاً ثم أعد المحاولة.'});}else{throw new Error('registry')}}catch{renderDomainResult({domain,status:'error',message:'تعذّر تأكيد الحالة الآن. لا نعتبر النطاق متاحاً بسبب تعذر الاتصال؛ جرّب لاحقاً أو تحقق عبر ICANN.'});}finally{button.disabled=false;button.removeAttribute('aria-busy');}});}
+if(motionAllowed&&'IntersectionObserver'in window){
+  document.documentElement.classList.add('js-motion');
+  const observer=new IntersectionObserver(items=>{
+    items.forEach(item=>{
+      if(item.isIntersecting){
+        item.target.classList.add('revealed');
+        observer.unobserve(item.target);
+      }
+    });
+  },{threshold:.06});
+  document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+}
+
+// Animated Promotional Hero Banner Logic for FaceJo
+const heroScenes=[
+  {
+    badge:'مؤسسة FaceJo · حلول البرمجة والتصميم',
+    title:'تصميم مواقع أنيقة وبرمجيات مخصصة للشركات',
+    desc:'نساعد الشركات والأفراد على بناء حضور رقمي قوي من خلال مواقع سريعة، أنظمة برمجية متكاملة، وتطبيقات ذكية.',
+    url:'facejo://web-and-software-solutions',
+    stageTitle:'تطوير مواقع الويب والبرمجيات المتكاملة',
+    stageSub:'UI/UX • Custom ERP & SaaS • Mobile Apps',
+    pills:['✔ تصميم مواقع احترافية','✔ برمجيات وأنظمة خاصة','✔ متاجر وتطبيقات ذكية']
+  },
+  {
+    badge:'خدمة تصميم وتطوير المواقع الإلكترونية',
+    title:'مواقع إلكترونية عصرية متجاوبة تتصدر محركات البحث',
+    desc:'نصمم مواقع الشركات وصفحات الهبوط التفاعلية بسرعة فائقة وتجربة مستخدم (UI/UX) تضاعف مبيعاتك.',
+    url:'facejo://responsive-web-design',
+    stageTitle:'تصميم مواقع شركات وصفحات هبوط احترافية',
+    stageSub:'Responsive Design • SEO Ready • High Speed',
+    pills:['✔ تجاوب كامل مع الجوال','✔ سرعة تحميل 99%','✔ تهيئة محركات البحث SEO']
+  },
+  {
+    badge:'خدمة البرمجيات والأنظمة المخصصة',
+    title:'أنظمة إدارية وبرمجيات سحابية مصممة لعملك',
+    desc:'بناء أنظمة المحاسبة، إدارة الموارد (ERP)، إدارة العملاء (CRM)، ولوحات التحكم الذكية بأعلى معايير الأمان.',
+    url:'facejo://custom-software-erp',
+    stageTitle:'برمجة أنظمة الشركات ولوحات التحكم',
+    stageSub:'Cloud ERP • Custom CRM • Secure API',
+    pills:['✔ أنظمة إدارة مخصصة','✔ تقارير وإحصائيات لحظية','✔ حماية وتشفير سحابي']
+  },
+  {
+    badge:'تطبيقات الهواتف والمتاجر الإلكترونية',
+    title:'تطبيقات جوال ومتاجر إلكترونية تضاعف وصولك للعملاء',
+    desc:'تطوير تطبيقات iOS و Android ومتاجر إلكترونية متكاملة مع ربط بوابات الدفع الإلكتروني والشحن.',
+    url:'facejo://mobile-apps-and-ecommerce',
+    stageTitle:'تطبيقات ذكية ومتاجر إلكترونية متكاملة',
+    stageSub:'iOS & Android • E-Commerce • Payment Gateways',
+    pills:['✔ تطبيقات iOS و Android','✔ متاجر إلكترونية متكاملة','✔ ربط الدفع والشحن']
+  }
+];
+
+const heroEl=document.getElementById('facejo-animated-hero');
+if(heroEl){
+  let currentScene=0;
+  let progress=0;
+  const badgeEl=document.getElementById('hero-scene-badge');
+  const titleEl=document.getElementById('hero-scene-title');
+  const descEl=document.getElementById('hero-scene-desc');
+  const urlEl=document.getElementById('hero-window-url');
+  const pillsEl=document.getElementById('hero-scene-pills');
+  const stageEl=document.getElementById('hero-scene-stage');
+  const barEl=document.getElementById('hero-progress-bar');
+  const tabs=document.querySelectorAll('[data-hero-scene]');
+
+  function setHeroScene(index){
+    currentScene=(index+heroScenes.length)%heroScenes.length;
+    const s=heroScenes[currentScene];
+    if(badgeEl)badgeEl.textContent=s.badge;
+    if(titleEl)titleEl.textContent=s.title;
+    if(descEl)descEl.textContent=s.desc;
+    if(urlEl)urlEl.textContent=s.url;
+    if(pillsEl)pillsEl.innerHTML=s.pills.map(p=>`<span class="hero-pill">${p}</span>`).join('');
+    if(stageEl){
+      const st=stageEl.querySelector('.stage-title');
+      const sb=stageEl.querySelector('.stage-sub');
+      if(st)st.textContent=s.stageTitle;
+      if(sb)sb.textContent=s.stageSub;
+    }
+    tabs.forEach((t,i)=>t.classList.toggle('active',i===currentScene));
+    progress=0;
+    if(barEl)barEl.style.width='0%';
+  }
+
+  tabs.forEach(t=>t.addEventListener('click',()=>setHeroScene(Number(t.dataset.heroScene))));
+
+  setInterval(()=>{
+    progress+=2;
+    if(progress>=100){
+      setHeroScene(currentScene+1);
+    }else if(barEl){
+      barEl.style.width=progress+'%';
+    }
+  },100);
+
+  // Interactive Canvas Particles
+  const canvas=document.getElementById('hero-particles-canvas');
+  if(canvas){
+    const ctx=canvas.getContext('2d');
+    let pts=[];
+    function resize(){
+      canvas.width=heroEl.clientWidth||800;
+      canvas.height=heroEl.clientHeight||500;
+      pts=Array.from({length:32},()=>({
+        x:Math.random()*canvas.width,
+        y:Math.random()*canvas.height,
+        vx:(Math.random()-.5)*.6,
+        vy:(Math.random()-.5)*.6
+      }));
+    }
+    resize();
+    window.addEventListener('resize',resize);
+    function draw(){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      for(let i=0;i<pts.length;i++){
+        const p=pts[i];
+        p.x+=p.vx;p.y+=p.vy;
+        if(p.x<0||p.x>canvas.width)p.vx*=-1;
+        if(p.y<0||p.y>canvas.height)p.vy*=-1;
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,2,0,Math.PI*2);
+        ctx.fillStyle='#38bdf8';
+        ctx.globalAlpha=.5;
+        ctx.fill();
+        for(let j=i+1;j<pts.length;j++){
+          const q=pts[j];
+          const d=Math.hypot(p.x-q.x,p.y-q.y);
+          if(d<120){
+            ctx.beginPath();
+            ctx.moveTo(p.x,p.y);
+            ctx.lineTo(q.x,q.y);
+            ctx.strokeStyle='#38bdf8';
+            ctx.globalAlpha=(1-d/120)*.2;
+            ctx.stroke();
+          }
+        }
+      }
+      requestAnimationFrame(draw);
+    }
+    if(motionAllowed)requestAnimationFrame(draw);
+  }
+}
+
+// Domain availability checker from original FaceJo repo
+function normalizeDomain(value){
+  let name=value.trim().toLowerCase();
+  if(/\s/.test(name))throw new Error('يرجى إدخال اسم نطاق صالح بدون مسافات');
+  name=name.replace(/^https?:\/\//,'').replace(/^www\./,'').replace(/\/$/,'');
+  if(/[\/?#@:]/.test(name))throw new Error('أدخل اسم النطاق فقط بدون مسارات');
+  if(!name.includes('.'))name+='.com';
+  return name;
+}
+const domainForm=document.querySelector('#domain-form');
+if(domainForm){
+  const input=document.querySelector('#domain-input');
+  document.querySelectorAll('[data-tld]').forEach(b=>b.addEventListener('click',()=>{
+    let value=input.value.trim().replace(/^https?:\/\//,'').replace(/^www\./,'').split('/')[0];
+    const base=value?value.split('.')[0]:'facejo';
+    input.value=base+'.'+b.dataset.tld;
+    input.focus();
+  }));
+  domainForm.addEventListener('submit',event=>{
+    event.preventDefault();
+    const area=document.querySelector('#domain-result');
+    try{
+      const domain=normalizeDomain(input.value);
+      input.value=domain;
+      area.innerHTML=`<div style="margin-top:12px;padding:12px;border-radius:12px;background:#ffffff0a;border:1px solid #38bdf840;display:flex;align-items:center;justify-content:space-between;gap:12px"><span>النطاق: <strong dir="ltr">${domain}</strong></span><a class="button button-outline" target="_blank" rel="noopener" href="https://www.namecheap.com/domains/registration/results/?domain=${encodeURIComponent(domain)}">فحص وحجز النطاق ↗</a></div>`;
+    }catch(err){
+      area.textContent=err.message;
+    }
+  });
+}

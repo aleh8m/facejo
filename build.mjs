@@ -1,46 +1,172 @@
 import fs from 'node:fs';
-const out='dist';fs.mkdirSync(out,{recursive:true});fs.cpSync('src',out,{recursive:true});
-const origin=(process.env.SITE_URL||'https://facejo-studio.briskbook8.chatgpt.site').replace(/\/$/,'');
+import path from 'node:path';
+
+const out='dist';
+fs.rmSync(out,{recursive:true,force:true});
+fs.mkdirSync(out+'/assets',{recursive:true});
+fs.cpSync('src',out,{recursive:true});
+const origin=(process.env.SITE_URL||'https://aleh8m.github.io/facejo').replace(/\/$/,'');
 const basePath=new URL(origin).pathname.replace(/\/$/,'');
 const whatsapp='https://wa.me/962791698516';
-const wa=(text='مرحباً Facejo، بدي أحكي معكم عن مشروعي.')=>whatsapp+'?text='+encodeURIComponent(text);
-const icon=(name)=>{const paths={arrow:'M7 17 17 7M7 7h10v10',code:'m8 7-5 5 5 5m8-10 5 5-5 5m-3-12-2 14',globe:'M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM3 12h18M12 3c5 5 5 13 0 18-5-5-5-13 0-18Z',grid:'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z',spark:'m12 2 3 7 7 3-7 3-3 7-3-7-7-3 7-3 3-7Z',shield:'m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Zm-4 9 3 3 5-6',check:'m5 12 4 4L19 6',phone:'M5 3h4l2 5-3 2c2 3 3 4 6 6l2-3 5 2v4c-1 4-9 0-13-4S1 4 5 3Z',chat:'M21 11a9 9 0 0 1-9 9H4l-2 2 2-7a9 9 0 1 1 17-4ZM8 10h8M8 14h5',layers:'m12 3 10 5-10 5L2 8l10-5ZM2 12l10 5 10-5M2 16l10 5 10-5',mobile:'M7 2h10v20H7ZM11 18h2',menu:'M4 7h16M4 12h16M4 17h16'};return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${(paths[name]||paths.arrow).split('ZZ').map(d=>`<path d="${d}"/>`).join('')}</svg>`};
-const mark=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 140"><defs><linearGradient id="b" x2="1" y2="1"><stop stop-color="#86b3ff"/><stop offset="1" stop-color="#4b6bff"/></linearGradient></defs><g transform="translate(125 0) scale(-1 1)"><path d="M80 17C48 17 35 37 36 57l-12 19 13 6 3 17c2 9 10 13 25 12v19h25v-29c14-12 21-26 20-42-1-26-11-42-30-42Z" fill="none" stroke="url(#b)" stroke-width="7" stroke-linejoin="round"/><path d="M42 56h12M44 86h11" fill="none" stroke="#9af2b9" stroke-width="5" stroke-linecap="round"/></g><path d="m103 28 21-10 13 12 11 38-12 24-18 4-9 23-16-10 14-34-5-24Z" fill="none" stroke="#9af2b9" stroke-width="2"/><g fill="none" stroke="#9af2b9" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"><path d="M112 75V51h25v24m-28 0h31m-28-24 13-8 13 8m-21 24V55m7 20V55m7 20V55m-11-12v-5h9v5"/><path d="M112 98q16 11 28-2m-25-1q13 7 22-1M117 35V24h5v11m6-1V19h6v18"/></g></svg>`;
+const wa=(text='مرحباً Facejo، أريد الاستفسار عن خدمة برمجة موقع.')=>whatsapp+'?text='+encodeURIComponent(text);
+
+const icon=(name)=>{
+  const paths={
+    arrow:'M7 17 17 7M7 7h10v10',
+    code:'m8 7-5 5 5 5m8-10 5 5-5 5m-3-12-2 14',
+    globe:'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zm-9-9h18M12 3a15.3 15.3 0 0 1 4 9 15.3 15.3 0 0 1-4 9 15.3 15.3 0 0 1-4-9 15.3 15.3 0 0 1 4-9z',
+    mobile:'M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm5 17a1 1 0 1 0 0-2 1 1 0 0 0 0 2z'
+  };
+  return `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${paths[name]}"/></svg>`;
+};
+
+const mark=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 140"><defs><linearGradient id="b" x2="1" y2="1"><stop offset="0%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#38bdf8"/></linearGradient></defs><rect width="160" height="140" rx="32" fill="#11182a"/><path d="M42 38h76v22H70v18h40v20H70v24H42z" fill="url(#b)"/><circle cx="120" cy="112" r="10" fill="#38bdf8"/></svg>`;
 fs.writeFileSync(out+'/assets/facejo-mark.svg',mark);
-fs.writeFileSync(out+'/assets/facejo-logo.svg',mark.replace('viewBox="0 0 160 140"','viewBox="0 0 460 140"') .replace('</svg>','<text x="175" y="96" font-family="Arial,sans-serif" font-weight="700" font-size="78" letter-spacing="-5" fill="#eff4ff">Face<tspan fill="#9af2b9">jo</tspan></text></svg>'));
+fs.writeFileSync(out+'/assets/facejo-logo.svg',mark.replace('viewBox="0 0 160 140"','viewBox="0 0 460 140"').replace('</svg>',`<text x="175" y="92" fill="#edf3ff" font-family="system-ui,-apple-system,sans-serif" font-weight="800" font-size="64" letter-spacing="-1">Facejo</text></svg>`));
 fs.writeFileSync(out+'/assets/favicon.svg',mark);
-const routes=[['/','الرئيسية'],['/services/','خدماتنا'],['/offers/','العروض'],['/work/','التصاميم'],['/domains/','افحص دومينك'],['/about/','عن Facejo']];
-const btn=(text,url,secondary=false,attrs='')=>`<a class="button ${secondary?'button-outline':''}" href="${url}" ${attrs}>${text}${icon('arrow')}</a>`;
+
+const routes=[
+  ['/','الرئيسية'],
+  ['/services/','الخدمات'],
+  ['/offers/','العروض'],
+  ['/work/','أعمالنا'],
+  ['/domains/','فحص الدومين'],
+  ['/about/','من نحن'],
+  ['/contact/','تواصل معنا'],
+  ['/privacy/','سياسة الخصوصية']
+];
+
+const btn=(text,url,secondary=false,attrs='')=>`<a class="button ${secondary?'button-outline':''}" href="${url}" ${attrs}>${text}</a>`;
 const eyebrow=(text)=>`<div class="eyebrow"><span></span>${text}</div>`;
 const heading=(small,title,desc='')=>`<section class="page-heading container">${eyebrow(small)}<h1>${title}</h1>${desc?`<p>${desc}</p>`:''}</section>`;
-const chips='<div class="trust-chips"><span>'+icon('mobile')+'مصمم لكل شاشة</span><span>'+icon('globe')+'عربي من الأساس</span><span>'+icon('shield')+'تفاصيل واضحة</span></div>';
-const serviceData=[{id:'web',icon:'globe',title:'مواقع تحكي عنك',en:'WEB DESIGN',desc:'من صفحة البداية إلى موقع الشركة. تجربة عربية واضحة، وتصميم يقرّب الزائر من الخطوة التالية.',tags:['صفحات هبوط','مواقع شركات','مواقع تعريفية']},{id:'software',icon:'code',title:'برامج تشتغل بطريقتك',en:'CUSTOM SOFTWARE',desc:'حوّل خطوات العمل المتكررة إلى تجربة منظمة. نحدد المطلوب ونبني النظام على مقاس احتياجك.',tags:['لوحات تحكم','إدارة العمليات','تطبيقات ويب']},{id:'commerce',icon:'grid',title:'متجرك، بواجهة تليق فيه',en:'E-COMMERCE',desc:'عرض المنتجات وتنظيم الأقسام وتجربة الطلب. التكاملات والدفع تُحدد بحسب متطلبات مشروعك.',tags:['كتالوج منتجات','تجربة شراء','تكاملات حسب الطلب']},{id:'identity',icon:'spark',title:'هوية تعيش على الشاشة',en:'DIGITAL IDENTITY',desc:'ألوان وخطوط وواجهات متناسقة تجعل حضور علامتك مميزاً، من أول زيارة حتى آخر تفصيل.',tags:['تصميم واجهات','هوية رقمية','تحسين تجربة المستخدم']}];
-const services=(all=false)=>`<div class="services-grid">${serviceData.slice(0,all?4:3).map((s,i)=>`<article class="service-card reveal"><div class="card-top"><span class="service-icon">${icon(s.icon)}</span><span class="index">0${i+1}</span></div><small dir="ltr">${s.en}</small><h3>${s.title}</h3><p>${s.desc}</p><div class="tags">${s.tags.map(t=>`<span>${t}</span>`).join('')}</div><a class="text-link" href="/contact/?service=${encodeURIComponent(s.title)}">نحكي عن مشروعك ${icon('arrow')}</a></article>`).join('')}</div>`;
-const mock=(type)=>`<div class="mock mock-${type}" aria-hidden="true"><div class="mock-bar"><i></i><i></i><i></i><span>${type==='food'?'TASTE & TABLE':type==='beauty'?'LUMA STUDIO':'FORM / SPACE'}</span></div><div class="mock-content"><div class="mock-copy"><em>${type==='food'?'طعم له حكاية':type==='beauty'?'الجمال في التفاصيل':'مساحات تلهمك'}</em><strong>${type==='food'?'كل لقمة،\nلحظة حلوة.':type==='beauty'?'مساحة من\nالجمال والهدوء.':'أفكار تتحول\nإلى مساحات.'}</strong><b></b><b></b><label>اكتشف المزيد ↗</label></div><div class="mock-object">${type==='food'?'<div class="dish"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>':type==='beauty'?'<div class="bottle"><i></i></div><div class="mirror"></div>':'<div class="building"><i></i><i></i><i></i></div>'}</div></div></div>`;
-const projectData=[['food','مطعم / كافيه','منيو واضح. وطلب أقرب.','food'],['beauty','جمال / عناية','تجربة هادئة، بتفاصيل أنيقة.','beauty'],['build','عمارة / إنشاءات','مساحات للمشاريع والحكايات.','build']];
-const projects=()=>`<div class="projects-grid">${projectData.map(([type,tag,title,category])=>`<article class="project-card reveal" data-category="${category}"><a class="project-art" href="/concepts/${type}/" target="_blank" rel="noopener" aria-label="عرض تصور ${tag}">${mock(type)}<span class="project-open">${icon('arrow')}</span></a><div class="project-caption"><div><small>${tag} · تصور توضيحي</small><h3>${title}</h3></div><a href="/concepts/${type}/" target="_blank" rel="noopener" aria-label="فتح التصور">${icon('arrow')}</a></div></article>`).join('')}</div>`;
-const offerCard=(compact=false)=>`<div class="offer-feature reveal"><div class="offer-copy"><span class="pill green">بداية ذكية لحضورك</span><h2>أول خطوة لمشروعك،<br>بسعر واضح.</h2><p>صفحة عربية تعرّف بخدماتك، وتوصل الزبون معك مباشرةً. بدون تعقيد.</p><div class="price"><strong>50</strong><span>دينار أردني<small>شامل استضافة السنة الأولى</small></span></div>${btn('احجز عرض الانطلاقة',wa('مرحباً Facejo، مهتم بعرض الانطلاقة بـ50 دينار. بدي أعرف التفاصيل.'))}</div><div class="offer-includes"><h3>شو داخل العرض؟</h3><ul class="check-list">${['صفحة واحدة بالعربية بتصميم يناسب نشاطك','متجاوبة مع الجوال والتابلت والكمبيوتر','تعريف وخدمات وعنوان وزر واتساب','استضافة سنة كاملة ونطاق فرعي','اتصال آمن HTTPS وشهادة SSL','جولة تعديلات واحدة قبل التسليم'].map(t=>`<li>${icon('check')}${t}</li>`).join('')}</ul><p class="fineprint">النطاق الخاص مثل .com غير مشمول. سعر التجديد بعد السنة الأولى يُتفق عليه قبل التفعيل. المتجر والدفع الإلكتروني والأنظمة المخصصة خارج هذه الباقة.</p></div></div>`;
-const cta=()=>`<section class="container cta-section reveal"><div><span class="eyebrow">جاهز نبدأ؟</span><h2>فكرتك تستاهل<br>تطلع للنور<span>.</span></h2></div><div><p>احكِ لنا عن مشروعك، ونرتب معك أول خطوة.</p>${btn('خلّينا نحكي', '/contact/')}</div><div class="cta-orbit" aria-hidden="true"></div></section>`;
-const faq=(items)=>`<div class="faq-list">${items.map(([q,a])=>`<details><summary>${q}<span>+</span></summary><p>${a}</p></details>`).join('')}</div>`;
-const domainWidget=(full=false)=>`<div class="domain-tool ${full?'domain-full':''}"><div class="domain-tool-intro">${icon('globe')}<div><h2>كل فكرة كبيرة تبدأ باسم.</h2><p>اكتب اسم مشروعك وافحص نطاقه مباشرةً.</p></div></div><form class="domain-form" id="domain-form"><label class="sr-only" for="domain-input">اسم النطاق</label><div class="domain-input-wrap"><span>www.</span><input id="domain-input" name="domain" type="text" inputmode="url" autocapitalize="none" autocomplete="off" spellcheck="false" placeholder="your-idea.com" dir="ltr" required maxlength="253"><span class="input-globe">${icon('globe')}</span></div><button class="button" type="submit" id="domain-submit">افحص الاسم ${icon('arrow')}</button></form><div class="domain-examples"><span>جرّب امتداداً:</span>${['com','net','org','dev','app'].map(t=>`<button type="button" class="tld-chip" data-tld="${t}">.${t}</button>`).join('')}<a href="https://www.dns.jo/" target="_blank" rel="noopener">.jo ↗</a></div><div class="domain-result" id="domain-result" role="status" aria-live="polite"></div><p class="fineprint">الفحص يستعلم عن سجل التسجيل، ولا يحجز الاسم. النتيجة غير المسجلة قد تكون محجوزة أو مميزة؛ تأكيد التوفر والسعر عند جهة التسجيل.</p></div>`;
-const pageBodies={
-'/':()=>`<section class="hero container"><div class="hero-copy">${eyebrow('استوديو رقمي · من الأردن')}<h1>وجه جديد<br>لحضورك <span class="gradient-text">الرقمي.</span></h1><p>نصمّم مواقع تُلفت. ونطوّر برامج تُنجز.<br>من أول فكرة إلى تجربة تليق باسم مشروعك.</p><div class="hero-actions">${btn('خلّينا نبني فكرتك','/contact/')}${btn('اكتشف خدماتنا','/services/',true)}</div>${chips}</div><div class="hero-art" aria-label="تكوين بصري يجمع شعار Facejo وواجهات رقمية"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="floating-tag tag-top"><span class="pulse-dot"></span>صُنع لفكرتك</div><div class="browser-visual"><div class="browser-top"><i></i><i></i><i></i><span>facejo / your next chapter</span></div><div class="browser-body"><span class="visual-kicker">BUILT AROUND YOU</span><img class="hero-logo" src="/assets/facejo-mark.svg" alt="وجه يتجه نحو معالم الأردن" width="160" height="140"><div class="visual-word" dir="ltr">Face<span>jo</span><b>✳</b></div><p>أفكار محلية. آفاق رقمية.</p><div class="visual-bars"><i></i><i></i><i></i></div></div></div><div class="float-code"><span>&lt;/&gt;</span><div><strong>فكرتك، بطريقتك.</strong><small>DESIGN + DEVELOPMENT</small></div></div><div class="float-label"><span>AR</span> عربي من الأساس ${icon('check')}</div><div class="art-caption">CREATE. CONNECT. GROW.</div></div></section><div class="marquee" aria-hidden="true"><div>${Array(4).fill('<span>واجهات تصنع الفرق</span><b>✳</b><span>برامج على مقاسك</span><b>✳</b><span>من الأردن إلى كل مكان</span><b>✳</b>').join('')}</div></div><section class="section container"><div class="section-heading reveal"><div>${eyebrow('ما الذي نقدمه؟')}<h2>كل ما تحتاجه فكرتك،<br>في مساحة واحدة.</h2></div><div><p>نربط التصميم بالوظيفة، لنصنع تجربة جميلة في شكلها وواضحة في استخدامها.</p><a class="text-link" href="/services/">جميع الخدمات ${icon('arrow')}</a></div></div>${services()}</section><section class="section portfolio-section"><div class="container"><div class="section-heading reveal"><div>${eyebrow('مساحة للإلهام')}<h2>أساليب مختلفة.<br>نفس الاهتمام بالتفاصيل.</h2></div><div><p>نماذج توضيحية لاتجاهات التصميم، وليست مشاريع منفذة لعملاء.</p><a class="text-link" href="/work/">استكشف التصاميم ${icon('arrow')}</a></div></div>${projects()}</div></section><section class="section container"><div class="section-heading reveal"><div>${eyebrow('عرض الانطلاقة')}<h2>ابدأ بحضور.<br>وكبّر فكرتك على مهلك.</h2></div></div>${offerCard(true)}</section><section class="section container">${domainWidget()}</section>${cta()}`,
-'/services/':()=>`${heading('تصميم + تطوير','خدمات تُبنى<br>حول <span class="gradient-text">احتياجك.</span>','واجهة يراها زبونك، أو نظام يساعد فريقك. نبدأ بفهم المطلوب ونحدد نطاق العمل بوضوح.') }<section class="container section compact-top">${services(true)}</section><section class="section container"><div class="section-heading"><div>${eyebrow('كيف نمشي معك؟')}<h2>من فكرة أولية،<br>إلى تجربة قابلة للاستخدام.</h2></div><p>خطوات واضحة، وتواصل مباشر في كل مرحلة.</p></div><div class="process-grid">${[['نسمع ونفهم','نشاطك، جمهورك، والشيء الذي تريد إنجازه.'],['نرتب ونصمم','نحدد الصفحات والوظائف ونتفق على اتجاه التصميم.'],['نبني ونراجع','نطور التجربة ونختبرها على الشاشات المناسبة.'],['نسلّم وننطلق','نراجع التفاصيل ونوضح طريقة الاستخدام والتجديد.']].map(([t,d],i)=>`<article class="process-step reveal"><span>0${i+1}</span><h3>${t}</h3><p>${d}</p></article>`).join('')}</div></section>${cta()}`,
-'/offers/':()=>`${heading('باقات واضحة','حضورك يبدأ<br>بـ<span class="gradient-text">50 دينار.</span>','ابدأ بصفحة تعرّف عن مشروعك. وإذا كان احتياجك أكبر، نصمم عرضاً يناسب نطاق العمل.') }<section class="container compact-top">${offerCard()}</section><section class="section container"><div class="custom-offers"><article class="reveal">${icon('layers')}<h3>موقع شركة بصفحات متعددة</h3><p>هيكل أوسع للمحتوى والخدمات، مع وظائف تُحدد بعد دراسة احتياجك.</p><strong>عرض سعر مخصص</strong>${btn('ناقش متطلبات الموقع','/contact/?service=موقع%20شركة',true)}</article><article class="reveal">${icon('code')}<h3>برنامج أو متجر مخصص</h3><p>للعمليات والمنتجات والتكاملات التي تحتاج تخطيطاً وتطويراً خاصاً.</p><strong>حسب نطاق المشروع</strong>${btn('احكِ لنا فكرتك','/contact/?service=برنامج%20مخصص',true)}</article></div></section><section class="section container faq-section"><div>${eyebrow('قبل ما تبدأ')}<h2>أجوبة واضحة<br>على أسئلتك.</h2></div>${faq([['هل الـ50 دينار تشمل الاستضافة؟','نعم، تشمل استضافة السنة الأولى مع نطاق فرعي واتصال آمن HTTPS. النطاق الخاص مثل .com غير مشمول، والتجديد يُتفق عليه قبل التفعيل.'],['هل يمكن ربط دومين أملكه؟','يمكن مناقشة ربط نطاق تملكه بعد التأكد من إعداداته والاستضافة. رسوم تسجيل أو تجديد النطاق لدى المسجل ليست ضمن عرض الـ50 دينار.'],['متى أستلم الموقع؟','نحدد موعد التسليم بعد استلام المحتوى وتأكيد المتطلبات. لا نعد بموعد قبل فهم التفاصيل.'],['ماذا تحتاجون مني؟','اسم النشاط، وصف الخدمات، وسيلة التواصل، والمحتوى والصور التي تملك حق استخدامها.'],['هل أقدر أطور الموقع لاحقاً؟','نعم، نحدد التوسعات المطلوبة ونقدم عرضاً منفصلاً للصفحات أو الوظائف الإضافية.']])}</section>${cta()}`,
-'/work/':()=>`${heading('مختبر التصميم','فكرة واحدة.<br><span class="gradient-text">وجوه كثيرة.</span>','نماذج توضيحية صممناها لاستعراض اتجاهات بصرية مختلفة. ليست أعمال عملاء أو شراكات تجارية.') }<section class="container compact-top section"><div class="filters" role="group" aria-label="تصفية التصاميم"><button class="active" data-filter="all" aria-pressed="true">كل التصاميم</button><button data-filter="food" aria-pressed="false">مطاعم وكافيهات</button><button data-filter="beauty" aria-pressed="false">جمال وعناية</button><button data-filter="build" aria-pressed="false">عمارة وإنشاءات</button></div>${projects()}</section>${cta()}`,
-'/domains/':()=>`${heading('اسمك على الإنترنت','فكرتك لها اسم.<br>خلّينا <span class="gradient-text">نلاقيه.</span>','افحص بيانات تسجيل النطاق مباشرةً، ثم أكّد إمكانية حجزه عند المسجل الذي تختاره.') }<section class="container compact-top domain-page">${domainWidget(true)}<div class="domain-tips"><article>${icon('spark')}<h3>قصير وسهل</h3><p>اختر اسماً يسهل تذكره وكتابته ومشاركته.</p></article><article>${icon('globe')}<h3>امتداد يناسبك</h3><p>.com خيار عام، و.jo لهوية مرتبطة بالأردن.</p></article><article>${icon('shield')}<h3>احجزه باسمك</h3><p>احتفظ بملكية النطاق وبيانات حسابه لديك.</p></article></div><div class="note-panel"><div>${icon('globe')}<h3>بدك نطاق أردني .jo؟</h3></div><p>البحث والتسجيل للنطاقات الوطنية عبر البوابة الأردنية الرسمية، وقد تخضع لشروط ووثائق خاصة.</p>${btn('افتح بوابة النطاقات الأردنية','https://www.dns.jo/',true,'target="_blank" rel="noopener noreferrer"')}</div></section>${cta()}`,
-'/about/':()=>`${heading('أهلاً، نحن Facejo','وجهة أردنية.<br>وطموح <span class="gradient-text">بلا حدود.</span>','علامة جديدة لخدمات تصميم وتطوير المواقع والبرامج. نؤمن أن كل مشروع يستحق حضوراً واضحاً وتجربة تليق به.') }<section class="section container compact-top about-grid"><div class="brand-story-art reveal"><img src="/assets/facejo-mark.svg" width="400" height="350" alt="شعار Facejo: وجه يلتفت نحو معالم الأردن"><span>ROOTED IN JORDAN. BUILT FOR WHAT’S NEXT.</span></div><div class="brand-story reveal">${eyebrow('فكرة الشعار')}<h2>وجه يتطلع إلى الأردن.<br>وفكرة تنطلق منه.</h2><p>يجمع الشعار وجهاً جانبياً يتجه نحو رموز مستوحاة من البتراء والمدرج الروماني وأبراج عمّان، ضمن تكوين يستلهم خريطة الأردن.</p><p>الأزرق للتقنية والوضوح، والأخضر للطموح والنمو. هوية تجمع الجذور المحلية مع مساحة مفتوحة للأفكار الجديدة.</p><a class="text-link" href="/assets/facejo-logo.svg" download="Facejo-logo.svg">تحميل الشعار ${icon('arrow')}</a></div></section><section class="section container"><div class="values-grid">${[['نفهم قبل أن نصمم','نبدأ بالسؤال الصحيح، حتى يكون الحل مناسباً لاحتياجك.'],['الوضوح في التفاصيل','نتفق على النطاق والسعر والتجديد قبل البدء.'],['تصميم يُستخدم','جمال الواجهة مهم، وسهولة الوصول للمعلومة أهم.']].map(([t,d])=>`<article class="reveal"><span class="value-dot"></span><h3>${t}</h3><p>${d}</p></article>`).join('')}</div></section>${cta()}`,
-'/contact/':()=>`${heading('ابدأ المحادثة','عندك فكرة؟<br><span class="gradient-text">خلّينا نسمعها.</span>','املأ تفاصيل بسيطة، وسنجهز لك رسالة واتساب. راجعها ثم أرسلها بنفسك.') }<section class="section container compact-top contact-grid"><div class="contact-info"><div class="contact-card"><span class="service-icon">${icon('chat')}</span><h2>نبدأ برسالة.</h2><p>تواصل مباشرةً مع Facejo على واتساب، أو جهّز تفاصيل مشروعك من النموذج.</p><a class="contact-number" href="tel:+962791698516" dir="ltr">+962 79 169 8516</a>${btn('افتح محادثة واتساب',wa())}<span class="fineprint">الأردن · خدمة المشاريع عن بُعد</span></div><div class="small-note">${icon('shield')}<p>النموذج لا يحفظ بياناتك على خادمنا. تُرسل التفاصيل إلى واتساب فقط عندما تختار المتابعة.</p></div></div><form id="contact-form" class="contact-form"><div class="form-row"><label>اسمك<input name="name" autocomplete="name" required maxlength="80" placeholder="كيف نناديك؟"></label><label>اسم النشاط<input name="business" autocomplete="organization" maxlength="120" placeholder="اسم شركتك أو مشروعك"></label></div><label>شو الخدمة التي تحتاجها؟<select name="service" id="service-select"><option value="تصميم موقع">تصميم موقع</option><option value="عرض الانطلاقة — 50 دينار">عرض الانطلاقة — 50 دينار</option><option value="موقع شركة">موقع شركة</option><option value="برنامج مخصص">برنامج مخصص</option><option value="متجر إلكتروني">متجر إلكتروني</option><option value="تصميم واجهات وهوية">تصميم واجهات وهوية</option><option value="استفسار آخر">استفسار آخر</option></select></label><label>احكِ لنا عن فكرتك<textarea name="details" required maxlength="2000" rows="5" placeholder="عن مشروعك، الصفحات أو الوظائف المطلوبة، وأي تفاصيل مهمة..."></textarea></label><label class="consent"><input type="checkbox" name="consent" required><span>أوافق على نقل التفاصيل التي أدخلتها إلى واتساب لتجهيز رسالتي. <a href="/privacy/">الخصوصية</a></span></label><button class="button" type="submit">جهّز رسالتي على واتساب ${icon('arrow')}</button><p id="contact-feedback" class="fineprint" role="status"></p><div id="contact-preview" hidden></div></form></section>`,
-'/privacy/':()=>`${heading('الخصوصية والشروط','واضحين معك،<br>حتى في <span class="gradient-text">التفاصيل.</span>','آخر تحديث: 3 نوفمبر 2026') }<section class="container section compact-top legal"><h2>التواصل والبيانات</h2><p>الموقع لا ينشئ حسابات ولا يجمع مدفوعات. نموذج التواصل يجهز رسالة واتساب في متصفحك، ولا يخزن تفاصيلها على خادم Facejo. فتح المحادثة ينقل النص إلى واتساب وتطبق سياساته.</p><h2>فحص النطاقات</h2><p>عند اختيار الفحص، يُرسل اسم النطاق إلى خدمات سجلات النطاقات العامة عبر RDAP. لا نعرض بيانات شخصية لمالكي النطاقات. ظهور النطاق غير مسجل لا يضمن إمكانية شرائه؛ بعض الأسماء محجوزة أو مميزة.</p><h2>الخدمات الخارجية</h2><p>قد يحمل متصفحك الخطوط من Google Fonts، ويستخدم الموقع WhatsApp وروابط ICANN وبوابة dns.jo وخدمات سجلات النطاقات. لهذه الخدمات سياسات خصوصية مستقلة.</p><h2>العروض والأسعار</h2><p>عرض الانطلاقة بقيمة 50 ديناراً أردنياً يشمل صفحة واحدة بالعربية واستضافة السنة الأولى ونطاقاً فرعياً وشهادة أمان وجولة تعديلات واحدة. لا يشمل نطاقاً خاصاً أو متجراً أو دفعاً إلكترونياً أو برنامجاً مخصصاً. التجديد ونطاق العمل وموعد التسليم تُوضح قبل التعاقد.</p><h2>التصاميم التوضيحية</h2><p>التصاميم في معرض الموقع نماذج للاستعراض، ولا تمثل أعمال عملاء أو اعتماداً من جهات تجارية. ملكية محتوى العميل وحق استخدام صوره يجب تأكيدهما قبل النشر.</p><h2>الاستفسارات</h2><p>لأسئلة الخصوصية أو تفاصيل الخدمة، تواصل على الرقم المعلن: <a href="tel:+962791698516" dir="ltr">+962791698516</a>.</p></section>`
-};
-function layout(route,body){const title=route==='/'?'Facejo | وجه جديد لحضورك الرقمي':`Facejo | ${[...routes,['/contact/','تواصل معنا'],['/privacy/','الخصوصية والشروط']].find(([r])=>r===route)?.[1]||'تصميم وتطوير'}`;return `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b1020"><meta name="description" content="Facejo — تصميم وتطوير مواقع وبرامج في الأردن. عرض انطلاقة بـ50 دينار شامل استضافة السنة الأولى، مع فاحص نطاقات ومحادثة واتساب مباشرة."><meta property="og:title" content="${title}"><meta property="og:description" content="مواقع تُلفت. وبرامج تُنجز. اكتشف Facejo."><meta property="og:type" content="website"><meta property="og:url" content="${origin}${route}"><link rel="canonical" href="${origin}${route}"><title>${title}</title><link rel="icon" type="image/svg+xml" href="/assets/favicon.svg"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;450;500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="/style.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"Facejo","url":"${origin}","logo":"${origin}/assets/facejo-logo.svg","telephone":"+962791698516","areaServed":"JO","contactPoint":{"@type":"ContactPoint","telephone":"+962791698516","contactType":"customer service","availableLanguage":"Arabic"}}</script><script src="/app.js" defer></script></head><body><a class="skip-link" href="#main">انتقل إلى المحتوى</a><div class="ambient-glow" aria-hidden="true"></div><header class="site-header"><div class="container header-inner"><a class="brand" href="/" aria-label="Facejo — الرئيسية"><img src="/assets/facejo-logo.svg" alt="Facejo" width="145" height="45"></a><nav class="desktop-nav" aria-label="القائمة الرئيسية">${routes.map(([r,t])=>`<a href="${r}" ${route===r?'aria-current="page"':''}>${t}</a>`).join('')}</nav><a class="nav-cta" href="/contact/">ابدأ مشروعك ${icon('arrow')}</a><button class="menu-toggle" aria-label="فتح القائمة" aria-expanded="false" aria-controls="mobile-nav">${icon('menu')}</button></div><nav id="mobile-nav" class="mobile-nav" aria-label="قائمة الجوال" hidden>${routes.concat([['/contact/','ابدأ مشروعك']]).map(([r,t])=>`<a href="${r}" ${route===r?'aria-current="page"':''}>${t}${icon('arrow')}</a>`).join('')}</nav></header><main id="main">${body}</main><footer class="site-footer"><div class="container"><div class="footer-grid"><div class="footer-brand"><a class="brand" href="/"><img src="/assets/facejo-logo.svg" alt="Facejo" width="160" height="49"></a><p>وجه جديد لحضورك الرقمي.<br>تصميم وتطوير، من الأردن.</p><a href="${wa()}" class="footer-whatsapp" target="_blank" rel="noopener">نبدأ برسالة ${icon('arrow')}</a></div><div><h3>اكتشف Facejo</h3><a href="/services/">خدماتنا</a><a href="/work/">التصاميم</a><a href="/about/">عن Facejo</a></div><div><h3>خطوتك القادمة</h3><a href="/offers/">عرض الـ50 دينار</a><a href="/domains/">افحص دومينك</a><a href="/contact/">ابدأ مشروعك</a></div><div><h3>تواصل معنا</h3><a dir="ltr" href="tel:+962791698516">+962 79 169 8516</a><a href="${wa()}" target="_blank" rel="noopener">واتساب ↗</a><span>الأردن</span></div></div><div class="footer-bottom"><span>© 2026 Facejo. جميع الحقوق محفوظة.</span><a href="/privacy/">الخصوصية والشروط</a><span dir="ltr">A LOCAL FACE. A DIGITAL FUTURE.</span></div></div></footer><a class="floating-whatsapp" href="${wa()}" target="_blank" rel="noopener" aria-label="تواصل مع Facejo على واتساب">${icon('chat')}</a><button class="back-top" aria-label="العودة للأعلى">↑</button></body></html>`}
-for(const [route,render]of Object.entries(pageBodies)){let dir=out+route;fs.mkdirSync(dir,{recursive:true});fs.writeFileSync(dir+'index.html',layout(route,render()));}
-for(const[type,tag]of projectData){const title=type==='food'?'نموذج مطعم':type==='beauty'?'نموذج صالون':'نموذج عمارة';fs.mkdirSync(`${out}/concepts/${type}`,{recursive:true});fs.writeFileSync(`${out}/concepts/${type}/index.html`,`<!doctype html><html lang="ar" dir="rtl"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><link rel="stylesheet" href="/style.css"><title>${title} — تصور Facejo</title><body class="concept-page"><div class="concept-banner">تصور تصميم توضيحي من Facejo — ليس موقعاً لنشاط حقيقي. <a href="/work/">العودة للتصاميم ↗</a></div><main class="container"><div class="concept-display">${mock(type)}</div><section class="concept-details"><h1>${title}</h1><p>اتجاه بصري قابل للتخصيص لنشاطك. الألوان والمحتوى والوظائف تُبنى حول احتياج مشروعك.</p>${btn('أريد تصميماً بهذا الاتجاه',wa('مرحباً Facejo، أعجبني '+title+' وأريد مناقشة تصميم يناسب مشروعي.'))}</section></main></body></html>`);}
-fs.writeFileSync(out+'/404.html',layout('/privacy/','<section class="page-heading container"><h1>هذه الصفحة غير موجودة.</h1><p>قد يكون الرابط تغيّر. يمكنك العودة للرئيسية.</p>'+btn('العودة للرئيسية','/')+'</section>'));
-fs.writeFileSync(out+'/robots.txt','User-agent: *\nAllow: /\nDisallow: /concepts/\nSitemap: '+origin+'/sitemap.xml\n');fs.writeFileSync(out+'/sitemap.xml','<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+Object.keys(pageBodies).map(r=>`<url><loc>${origin}${r}</loc></url>`).join('')+'</urlset>');
-console.log('Built 8 pages + 3 original concepts + logo assets.');
+const chips='<div class="trust-chips"><span>'+icon('mobile')+' تطوير سريع ومتجاوب</span><span>'+icon('globe')+' استضافة وسرعة فائقة</span><span>'+icon('code')+' برمجيات وأنظمة مخصصة</span></div>';
 
-// Keep project-site URLs under their GitHub Pages repository path.
-function rewritePages(directory){for(const entry of fs.readdirSync(directory,{withFileTypes:true})){const file=directory+'/'+entry.name;if(entry.isDirectory())rewritePages(file);else if(entry.name.endsWith('.html')){const html=fs.readFileSync(file,'utf8');fs.writeFileSync(file,html.replace(/(href|src|action)="\/(?!\/)/g,(_,attribute)=>attribute+'="'+basePath+'/'));}}}
+const serviceData=[
+  {id:'web',icon:'globe',title:'تطوير مواقع ويب متكاملة',en:'WEB DESIGN',desc:'تصميم وتطوير مواقع إلكترونية حديثة وسريعة ومتوافقة مع الهواتف الذكية مع تحسين محركات البحث.'},
+  {id:'custom',icon:'code',title:'أنظمة وبرمجيات خاصة',en:'CUSTOM SOFTWARE',desc:'بناء أنظمة إدارة، لوحات تحكم، وحلول برمجية مخصصة تلبي احتياجات عملك بدقة.'},
+  {id:'domain',icon:'arrow',title:'حجز دومينات واستضافة',en:'DOMAINS & HOSTING',desc:'مساعدة في اختيار وحجز أسماء النطاقات وإعداد الاستضافة السحابية بأسعار منافسة.'},
+  {id:'mobile',icon:'mobile',title:'تطبيقات الهواتف والمتاجر',en:'MOBILE & E-COMMERCE',desc:'تصميم وبرمجة المتاجر الإلكترونية وتطبيقات الجوال (iOS & Android) بواجهات عصرية.'}
+];
+
+const services=(all=false)=>`<div class="services-grid">${(all?serviceData:serviceData.slice(0,4)).map((s,i)=>`<article class="service-card reveal" style="--i:${i}"><div class="service-top"><div class="service-icon">${icon(s.icon)}</div><span class="service-tag">${s.en}</span></div><h3>${s.title}</h3><p>${s.desc}</p></article>`).join('')}</div>`;
+
+const animatedHeroSection=()=>`
+<section class="hero animated-hero-banner container" id="facejo-animated-hero">
+  <canvas id="hero-particles-canvas" class="hero-canvas" aria-hidden="true"></canvas>
+  <div class="hero-grid">
+    <div class="hero-copy">
+      <div class="eyebrow"><span class="pulse-dot"></span><span id="hero-scene-badge">مؤسسة FaceJo · حلول البرمجة والتصميم</span></div>
+      <h1 id="hero-scene-title">تصميم مواقع أنيقة وبرمجيات مخصصة للشركات</h1>
+      <p id="hero-scene-desc">نساعد الشركات والأفراد على بناء حضور رقمي قوي من خلال مواقع سريعة، أنظمة برمجية متكاملة، وتطبيقات ذكية.</p>
+      <div class="hero-pills" id="hero-scene-pills">
+        <span class="hero-pill">✔ تصميم مواقع احترافية</span>
+        <span class="hero-pill">✔ برمجيات وأنظمة خاصة</span>
+        <span class="hero-pill">✔ متاجر وتطبيقات ذكية</span>
+      </div>
+      <div class="hero-actions">
+        ${btn('استكشف خدماتنا','/services/')}
+        ${btn('تواصل عبر واتساب',wa(),true,'target="_blank" rel="noopener"')}
+      </div>
+      ${chips}
+    </div>
+    <div class="hero-visual">
+      <div class="browser-bar">
+        <div class="dots"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span></div>
+        <div class="url-bar" id="hero-window-url" dir="ltr">facejo://web-and-software-solutions</div>
+        <span class="live-pill">LIVE</span>
+      </div>
+      <div class="hero-art" id="hero-scene-stage">
+        <div class="mock-card">
+          <div class="mock-icon">FJ</div>
+          <div class="mock-lines">
+            <div class="stage-title">تطوير مواقع الويب والبرمجيات المتكاملة</div>
+            <div class="stage-sub">UI/UX • Custom ERP & SaaS • Mobile Apps</div>
+          </div>
+        </div>
+        <div class="stage-metrics">
+          <div class="metric-box"><strong>100%</strong><span>تجاوب وسرعة</span></div>
+          <div class="metric-box"><strong>99.9%</strong><span>استقرار وأمان</span></div>
+          <div class="metric-box"><strong>24/7</strong><span>دعم فني</span></div>
+        </div>
+      </div>
+      <div class="hero-timeline">
+        <div class="hero-progress-track"><div id="hero-progress-bar" class="hero-progress-fill"></div></div>
+        <div class="hero-scene-tabs">
+          <button type="button" class="scene-tab active" data-hero-scene="0">01 الهوية الرقمية</button>
+          <button type="button" class="scene-tab" data-hero-scene="1">02 تصميم المواقع</button>
+          <button type="button" class="scene-tab" data-hero-scene="2">03 البرمجيات والأنظمة</button>
+          <button type="button" class="scene-tab" data-hero-scene="3">04 المتاجر والتطبيقات</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>`;
+
+const brandCardSection=()=>`
+<section class="container section-padding reveal" id="brand-card-showcase">
+  ${eyebrow('الهوية البصرية والكرت الدعائي')}
+  <h2>FaceJo — شريكك التقني لتصميم المواقع والبرمجيات</h2>
+  <div class="brand-showcase-grid">
+    <div class="brand-showcase-copy">
+      <p>نقدم في <strong>FaceJo</strong> تجربة متكاملة تبدأ من التخطيط وتصميم واجهات المستخدم (UI/UX) وصولاً إلى برمجة المواقع والأنظمة السحابية وتطبيقات الهواتف الذكية.</p>
+      <div class="hero-actions" style="margin-top:20px">
+        ${btn('اطلب مشروعك عبر واتساب',wa('مرحباً FaceJo، أرغب في طلب تصميم موقع أو برنامج مخصص.'),false,'target="_blank" rel="noopener"')}
+      </div>
+    </div>
+    <div class="brand-showcase-img">
+      <img src="/assets/facejo-promo-card.jpg" alt="الكرت الدعائي الرسمي لمشروع FaceJo لتصميم المواقع وتطوير البرمجيات" loading="lazy"/>
+    </div>
+  </div>
+</section>`;
+
+const mock=(type)=>`<div class="mock mock-${type}" aria-hidden="true"><div class="mock-bar"><i></i><i></i><i></i></div><div class="mock-body"><div class="mock-title"></div><div class="mock-line"></div><div class="mock-line short"></div><div class="mock-grid"><div></div><div></div></div></div></div>`;
+const projectData=[['food','مطعم / كافيه','food','مطعم وكافيه - منيو إلكتروني ونظام طلبات'],['beauty','مركز تجميل','beauty','مركز تجميل - حجز مواعيد أونلاين'],['tech','شركة تقنية','tech','شركة تقنية - موقع تعريفي ولوحة خدمات']];
+const projects=()=>`<div class="projects-grid">${projectData.map(([type,tag,category,title])=>`<article class="project-card" data-category="${category}"><div class="project-preview">${mock(type)}</div><div class="project-info"><span class="project-tag">${tag}</span><h3>${title}</h3></div></article>`).join('')}</div>`;
+const offerCard=(compact=false)=>`<div class="offer-feature reveal"><div class="offer-copy"><span class="pill green">عرض خاص</span><h2>باقة الانطلاق الرقمي</h2><p>موقع إلكتروني كامل مع دومين مجاني للسنة الأولى، تصاميم متوافقة مع الهواتف، وربط واتساب مباشر.</p><div class="offer-price"><span class="amount">199 JOD</span><span class="period">دفعة واحدة</span></div>${btn('اطلب العرض الآن عبر واتساب',wa('مرحباً، أريد طلب باقة الانطلاق الرقمي (199 JOD).'),false,'target="_blank" rel="noopener"')}</div></div>`;
+const cta=()=>`<section class="container cta-section reveal"><div class="cta-card">${eyebrow('تواصل مباشر')}<h2>هل لديك مشروع جاهز للتنفيذ؟</h2><p>تواصل معنا اليوم لتحويل فكرتك إلى موقع برمجي احترافي يخدم عملك.</p>${btn('تواصل معنا عبر واتساب',wa('مرحباً، أريد الاستفسار عن خدمات Facejo.'),false,'target="_blank" rel="noopener"')}</div></section>`;
+const faq=(items)=>`<div class="faq-list">${items.map(([q,a])=>`<details><summary>${q}<span>+</span></summary><p>${a}</p></details>`).join('')}</div>`;
+const domainWidget=(full=false)=>`<div class="domain-tool ${full?'domain-full':''}"><div class="domain-tool-intro">${eyebrow('فحص اسم النطاق')}${full?'<h1>ابحث عن الدومين المناسب لمشروعك</h1>':'<h2>افحص توفر الدومين لمشروعك</h2>'}</div><form id="domain-form" class="domain-form"><div class="domain-input-wrap"><input id="domain-input" type="text" placeholder="اكتب اسم الدومين مثلاً: facejo.com" dir="ltr"/><button id="domain-submit" class="button" type="submit">فحص الدومين</button></div><div class="tld-chips"><button type="button" data-tld="com">.com</button><button type="button" data-tld="net">.net</button><button type="button" data-tld="org">.org</button><button type="button" data-tld="jo">.jo</button></div><div id="domain-result"></div></form></div>`;
+
+const pageBodies={
+  '/':()=>`${animatedHeroSection()}<section class="container section-padding">${eyebrow('خدماتنا الرئيسية')}<h2>ماذا نقدم لك؟</h2>${services(true)}</section>${brandCardSection()}<section class="container section-padding">${eyebrow('عرض مميز')}<h2>أحدث العروض الحصرية</h2>${offerCard()}</section><section class="container section-padding">${eyebrow('أعمالنا')}<h2>نماذج من أعمالنا</h2>${projects()}</section><section class="container section-padding">${domainWidget()}</section>${cta()}`,
+  '/services/':()=>`${heading('خدمات Facejo','خدمات متكاملة + استضافة وحلول برمجية')}<section class="container section-padding">${services(true)}</section>${brandCardSection()}<section class="container section-padding">${domainWidget()}</section>${cta()}`,
+  '/offers/':()=>`${heading('العروض والأسعار','باقات مرنة تناسب جميع الميزانيات')}<section class="container section-padding">${offerCard()}</section><section class="container section-padding">${eyebrow('أسئلة شائعة')}<h2>أسئلة تهمك عن العروض</h2>${faq([['هل يوجد رسوم خفية؟','لا، الأسعار المعلنة شاملة للخدمات المحددة بدون أي تكاليف إضافية غير معلنة.'],['كم يستغرق تسليم الموقع؟','عادة بين 3 إلى 7 أيام عمل حسب حجم المشروع والمتطلبات.']])}</section>${cta()}`,
+  '/work/':()=>`${heading('معرض الأعمال','مشاريع تم تنفيذها بكفاءة عالية')}<section class="container section-padding">${projects()}</section>${cta()}`,
+  '/domains/':()=>`${heading('فحص الدومين','استكشف وتأكد من توفر اسم موقعك')}<section class="container section-padding">${domainWidget(true)}</section>${cta()}`,
+  '/about/':()=>`${heading('عن Facejo','نقدم أفضل الحلول البرمجية والتصميم بأعلى معايير الجودة.')}${brandCardSection()}${cta()}`,
+  '/contact/':()=>`${heading('تواصل معنا','يسعدنا التواصل معك ومناقشة مشروعك')}<section class="container section-padding"><div class="contact-grid"><div><h2>معلومات التواصل</h2><p>يمكنك التواصل معنا عبر الواتساب مباشرة للحصول على رد سريع.</p>${btn('تواصل عبر واتساب',wa(),false,'target="_blank" rel="noopener"')}</div></div></section>`,
+  '/privacy/':()=>`${heading('سياسة الخصوصية','نلتزم بحماية خصوصية زوارنا ومعلوماتهم.')}<section class="container section-padding"><p>نحن في Facejo نحترم خصوصيتك ولا نجمع أي بيانات شخصية دون موافقتك.</p></section>`
+};
+
+function layout(route,body){
+  const title=route==='/'?'Facejo | تصميم مواقع وبرمجيات مخصصة':'Facejo | '+[...routes].find(([r])=>r===route)?.[1];
+  return `<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>${title}</title><link rel="canonical" href="${origin}${route}"/><link rel="stylesheet" href="${basePath}/style.css"/><link rel="icon" href="${basePath}/assets/favicon.svg" type="image/svg+xml"/></head><body><header class="header"><div class="header-inner container"><a href="${basePath}/" class="brand"><img src="${basePath}/assets/facejo-logo.svg" alt="Facejo"/></a><nav class="desktop-nav">${routes.map(([r,l])=>`<a href="${basePath}${r}">${l}</a>`).join('')}</nav>${btn('واتساب',wa(),false,'target="_blank" rel="noopener"')}</div></header><main>${body}</main><footer class="footer"><div class="container"><p>&copy; ${new Date().getFullYear()} Facejo. جميع الحقوق محفوظة.</p></div></footer><script src="${basePath}/app.js" defer></script></body></html>`;
+}
+
+for(const [route,render] of Object.entries(pageBodies)){
+  let dir=out+route;
+  fs.mkdirSync(dir,{recursive:true});
+  fs.writeFileSync(dir+'index.html',layout(route,render()));
+}
+fs.writeFileSync(out+'/404.html',layout('/privacy/','<section class="page-heading container"><h1>الصفحة غير موجودة</h1><p>404</p></section>'));
+fs.writeFileSync(out+'/robots.txt','User-agent: *\nAllow: /\nDisallow: /concepts/\nSitemap: '+origin+'/sitemap.xml');
+
+function rewritePages(directory){
+  for(const entry of fs.readdirSync(directory,{withFileTypes:true})){
+    const file=path.join(directory,entry.name);
+    if(entry.isDirectory()){
+      rewritePages(file);
+    }else if(file.endsWith('.html')){
+      let content=fs.readFileSync(file,'utf8');
+      content=content.replace(/(href|src)="\/([^"]*)"/g,(match,attr,value)=>`${attr}="${value.startsWith(basePath.slice(1)+'/')?'/'+value:basePath+'/'+value}"`);
+      fs.writeFileSync(file,content);
+    }
+  }
+}
 if(basePath)rewritePages(out);
 fs.writeFileSync(out+'/.nojekyll','');
+console.log('Built merged FaceJo site successfully.');
+
+// Publish the complete Gemini homepage with the same design as the supplied preview.
+const standalone=fs.readFileSync('index.html','utf8').replace('</head>',`<link rel="canonical" href="${origin}/"/><link rel="icon" href="${basePath}/assets/favicon.svg" type="image/svg+xml"/></head>`);
+fs.writeFileSync(out+'/index.html',standalone);
